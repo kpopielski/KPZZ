@@ -1,33 +1,53 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
+
+using System.IO.Ports;
 
 public class PlayerControler : MonoBehaviour
 {
-    private float speed = 5.0f; // we can see this variable (because it is public) in unity
-    private float turnSpeed = 25.0f;
+    //deklaracje danych wykorzystywanych w skrypcie
+    private float speed = 5.0f; 
+    private float turnSpeed = 15.0f;
     private float horizontalInput;
     private float forwardInput;
     public GameObject player;
     public int score;
     public int life;
-    //static var score : int = 0;
-
-    // Start is called before the first frame update
+    SerialPort arduino;
+    string RectextL;
+    string RectextR;
+    int startstrR;
+    int startstrL;
+    int endstrR;
+    int endstrL;
+   [SerializeField] float curlenghtR;
+   [SerializeField] float curlenghtL;
+    int substrstartR;
+    int substrlenghtR;
+    int substrstartL;
+    int substrlenghtL;
+  
     void Start()
     {
         score = 0;
         life = 3;
+     //   if (isArduino)
+     //   {
+            arduino = new SerialPort("COM3", 9600);//pobranie danych z arduino
+            arduino.Open();
+     //   }
+        
     }
 
-    // Update is called once per frame
-    void Update() // update is called 50-60 times in a second, so it will move 60m per second
+    
+    void Update() 
     {
-        horizontalInput = Input.GetAxis("Horizontal"); // nazwa jej jest w edit->ProjectSettings->InputManager
+        horizontalInput = Input.GetAxis("Horizontal"); 
         forwardInput = Input.GetAxis("Vertical");
+        
 
-        if (transform.position.x > 10 )
+        if (transform.position.x > 10 ) //granice obszaru poruszania siê
         {
             transform.position = new Vector3(10, 0, -2);
         }
@@ -35,22 +55,27 @@ public class PlayerControler : MonoBehaviour
         {
             transform.position = new Vector3(-10, 0, -2);
         }
-        else
+        //else if (!isArduino) //funkcja mo¿liwa do w³¹czenia aby przestawiæ na sterowanie klawiatur¹
+        //{
+        //                                                                              
+        // transform.Translate(Vector3.right * Time.deltaTime * turnSpeed * horizontalInput);
+           
+        //}
+        else //poruszanie siê postaci prawo/lewo
         {
-            transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput); // now were moving 20m per s
-                                                                                          // transform.Translate(Vector3.right * Time.deltaTime * turnSpeed * horizontalInput); zamieniam na:
-            transform.Translate(Vector3.right* Time.deltaTime * turnSpeed * horizontalInput);  // y axis
+            
+            if (DataFromArduinoL() < 50)
+            {                                                                            
+                transform.Translate(Vector3.right * Time.deltaTime * turnSpeed * -1f);
+            }
+           if (DataFromArduinoR() < 50)
+            {
+                transform.Translate(Vector3.right * Time.deltaTime * turnSpeed * 1f);
+            }// y axis
         }
-        //constantly checking per frame
-        //we'll move vehicle forward
-        // transform.Translate(0, 0, 1); // transform to sekcja w Inspectorze Unity
-        // oznacza to samo, co:
-        //transform.Translate(Vector3.forward * Time.deltaTime); // now were moving 1m per s
-       // transform.Translate(Vector3.forward * Time.deltaTime * speed * forwardInput); // now were moving 20m per s
-        // transform.Translate(Vector3.right * Time.deltaTime * turnSpeed * horizontalInput); zamieniam na:
-       // transform.Translate(Vector3.right* Time.deltaTime * turnSpeed * horizontalInput);  // y axis
+      
     }
-    void OnCollisionEnter(Collision col)
+    void OnCollisionEnter(Collision col) //zdarzenie podczas kolizji
     {
         if (col.gameObject.CompareTag("prezent"))
         {
@@ -63,6 +88,38 @@ public class PlayerControler : MonoBehaviour
             life--;
         }
     }
+    float DataFromArduinoR() //zebranie danych z prawego czujnika
+    {
+        RectextR = RectextR + arduino.ReadLine();
+        startstrR = RectextR.LastIndexOf("R");
+        endstrR = RectextR.LastIndexOf("b");
+        if (startstrR > 0 && endstrR > 0 && endstrR > startstrR)
+        {
+            substrstartR = startstrR + 1;
+            substrlenghtR = endstrR - (startstrR + 1);
+            curlenghtR = int.Parse(RectextR.Substring(substrstartR, substrlenghtR));
+            RectextR = "";
+
+        }
+
+        return curlenghtR;
+    }
+    float DataFromArduinoL() //zebranie danych z lewego czujnika
+    {
+        RectextL = RectextL + arduino.ReadLine();
+        startstrL = RectextL.LastIndexOf("L");
+        endstrL = RectextL.LastIndexOf("a");
+
+        if (startstrL > 0 && endstrL > 0 && endstrL > startstrL)
+        {
+            substrstartL = startstrL + 1;
+            substrlenghtL = endstrL - (startstrL + 1);
+            curlenghtL = int.Parse(RectextL.Substring(substrstartL, substrlenghtL));
+            RectextL = "";
+        }
+        return curlenghtL;
+    }
+   
 }
 
 

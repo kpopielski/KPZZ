@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
-    
-{
+
+{ 
+    //deklaracje danych wykorzystywanych w skrypcie
     [SerializeField] private bool m_GameOver = false;
     [SerializeField] private bool m_WinGame = false;
     [SerializeField] public bool isGameActive = true;
@@ -17,10 +18,10 @@ public class GameManager : MonoBehaviour
     PlayerControler playerControler;
     [SerializeField] private int m_Points;
     [SerializeField] private int l_Points;
-    // Start is called before the first frame update
+    
     void Start()
     {
-        player = GameObject.Find("Mikolaj");
+        player = GameObject.Find("Mikolaj"); // pobranie obiektu postacie wraz z sktyptami
         playerControler = player.GetComponent<PlayerControler>();
     }
 
@@ -39,25 +40,25 @@ public class GameManager : MonoBehaviour
         }
 
     }
-    public void GameOver()
+    public void GameOver() //funkcja koñcz¹ca grê po przegraniu
     {
         isGameActive = false;
         m_GameOver = true;
         GameOverText.SetActive(true);
         
     }
-    public void GameWin()
+    public void GameWin() //funkcja koñcz¹ca grê po zwycieñstwie
     {
         isGameActive = false;
         m_WinGame = true;
         GameWinText.SetActive(true);
     }
-    void AddPoint(int point)
+    void AddPoint(int point) //funkcja dodaj¹ca punkty i wypisuj¹ca je na ekran
     {
        m_Points = point;
        Score.text = $"Score : {m_Points}";
     }
-    void LifePoint(int life)
+    void LifePoint(int life) // funkcja odejmuj¹ca punkty ¿ycia i wypisuj¹ca je na ekran
     {
         l_Points = life;
         Life.text = $"Life : {l_Points}";
